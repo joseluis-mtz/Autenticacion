@@ -1,0 +1,5 @@
+Crear migracion
+-> add-migration CrearMigracionInicial
+
+Enviar migracion al servidor
+-> update-database

@@ -1,4 +1,12 @@
+using LoginsAU.Datos;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Configurar conexion SQL
+builder.Services.AddDbContext<AplicacionDbConext>(opciones => 
+    opciones.UseSqlServer(builder.Configuration.GetConnectionString("LoginsDbConexion"))
+);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
