@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using LoginsAU.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace LoginsAU.Datos
@@ -10,5 +11,6 @@ namespace LoginsAU.Datos
         }
 
         // Modelos necesarios del proyecto
+        public DbSet<AppUsuario> AppUsuarios { get; set;}
     }
 }
