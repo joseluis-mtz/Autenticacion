@@ -1,4 +1,5 @@
 using LoginsAU.Datos;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AplicacionDbConext>(opciones => 
     opciones.UseSqlServer(builder.Configuration.GetConnectionString("LoginsDbConexion"))
 );
+
+// Agregar servicio Identity
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<AplicacionDbConext>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -25,6 +30,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// Agregar autenticacion
+app.UseAuthentication();
 
 app.UseAuthorization();
 
