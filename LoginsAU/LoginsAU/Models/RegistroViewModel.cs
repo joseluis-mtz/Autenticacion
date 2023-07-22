@@ -19,7 +19,8 @@ namespace LoginsAU.Models
         [DataType(DataType.Password)]
         [Display(Name = "Confirmar Contraseña")]
         public string ConfirmPassword { get; set; }
-
+        [Required(ErrorMessage = "Nombre obligatorio")]
+        public string Nombre { get; set; }
         public string Url { get; set; }
         public int CodigoPais { get; set; }
         public string Telefono { get; set; }
