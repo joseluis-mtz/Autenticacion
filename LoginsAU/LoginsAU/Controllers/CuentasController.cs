@@ -68,6 +68,12 @@ namespace LoginsAU.Controllers
                 ModelState.AddModelError(String.Empty, item.Description);
             }
         }
+
+        [HttpGet]
+        public IActionResult Acceso()
+        {
+            return View();
+        }
     }
 
 }
