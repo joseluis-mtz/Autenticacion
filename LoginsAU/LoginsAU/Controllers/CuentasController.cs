@@ -25,6 +25,7 @@ namespace LoginsAU.Controllers
             return View(regVM);
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Registro(RegistroViewModel Registro)
         {
             if (ModelState.IsValid)
@@ -76,6 +77,7 @@ namespace LoginsAU.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Acceso(AccesoViewModel Acceso)
         {
             if (ModelState.IsValid)
@@ -95,6 +97,14 @@ namespace LoginsAU.Controllers
             {
                 return View(Acceso);
             }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CerrarSesion()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction(nameof(HomeController.Index), "Home");
         }
     }
 
