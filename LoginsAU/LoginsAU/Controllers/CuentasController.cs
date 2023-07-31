@@ -74,6 +74,28 @@ namespace LoginsAU.Controllers
         {
             return View();
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Acceso(AccesoViewModel Acceso)
+        {
+            if (ModelState.IsValid)
+            {
+                var resultado = await _signInManager.PasswordSignInAsync(Acceso.Email, Acceso.Password, Acceso.RememberMe, lockoutOnFailure : false);
+                if (resultado.Succeeded)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Acceso no válido");
+                    return View(Acceso);
+                }
+            }
+            else
+            {
+                return View(Acceso);
+            }
+        }
     }
 
 }
