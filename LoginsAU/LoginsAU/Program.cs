@@ -13,6 +13,12 @@ builder.Services.AddDbContext<AplicacionDbConext>(opciones =>
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<AplicacionDbConext>();
 
+// URL de retorno para paginas no autorizadas
+builder.Services.ConfigureApplicationCookie(options => 
+{
+    options.LoginPath = new PathString("/Cuentas/Acceso");
+});
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 

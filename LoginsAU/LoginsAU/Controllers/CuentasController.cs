@@ -71,21 +71,24 @@ namespace LoginsAU.Controllers
         }
 
         [HttpGet]
-        public IActionResult Acceso()
+        public IActionResult Acceso(string returnUrl = null)
         {
+            ViewData["returnUrl"] = returnUrl;
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Acceso(AccesoViewModel Acceso)
+        public async Task<IActionResult> Acceso(AccesoViewModel Acceso, string returnUrl = null)
         {
+            ViewData["returnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
                 var resultado = await _signInManager.PasswordSignInAsync(Acceso.Email, Acceso.Password, Acceso.RememberMe, lockoutOnFailure : false);
                 if (resultado.Succeeded)
                 {
-                    return RedirectToAction("Index", "Home");
+                    //return RedirectToAction("Index", "Home");
+                    return Redirect(returnUrl);
                 }
                 else
                 {
