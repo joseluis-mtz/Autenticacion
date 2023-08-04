@@ -19,15 +19,17 @@ namespace LoginsAU.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Registro()
+        public async Task<IActionResult> Registro(string returnUrl = null)
         {
+            ViewData["returnUrl"] = returnUrl;
             RegistroViewModel regVM = new RegistroViewModel();
             return View(regVM);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Registro(RegistroViewModel Registro)
+        public async Task<IActionResult> Registro(RegistroViewModel Registro, string returnUrl = null)
         {
+            ViewData["returnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {
                 var Usuario = new AppUsuario
@@ -48,7 +50,8 @@ namespace LoginsAU.Controllers
                 if (resultado.Succeeded)
                 {
                     await _signInManager.SignInAsync(Usuario, isPersistent: false);
-                    return RedirectToAction("Index", "Home");
+                    //return RedirectToAction("Index", "Home");
+                    return LocalRedirect(returnUrl);
                 }
                 else
                 {
@@ -82,13 +85,14 @@ namespace LoginsAU.Controllers
         public async Task<IActionResult> Acceso(AccesoViewModel Acceso, string returnUrl = null)
         {
             ViewData["returnUrl"] = returnUrl;
+            returnUrl = returnUrl ?? Url.Content("~/");
             if (ModelState.IsValid)
             {
                 var resultado = await _signInManager.PasswordSignInAsync(Acceso.Email, Acceso.Password, Acceso.RememberMe, lockoutOnFailure : false);
                 if (resultado.Succeeded)
                 {
                     //return RedirectToAction("Index", "Home");
-                    return Redirect(returnUrl);
+                    return LocalRedirect(returnUrl);
                 }
                 else
                 {
