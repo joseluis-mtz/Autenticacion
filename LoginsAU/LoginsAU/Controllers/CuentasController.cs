@@ -88,11 +88,16 @@ namespace LoginsAU.Controllers
             returnUrl = returnUrl ?? Url.Content("~/");
             if (ModelState.IsValid)
             {
-                var resultado = await _signInManager.PasswordSignInAsync(Acceso.Email, Acceso.Password, Acceso.RememberMe, lockoutOnFailure : false);
+                var resultado = await _signInManager.PasswordSignInAsync(Acceso.Email, Acceso.Password, Acceso.RememberMe, lockoutOnFailure : true);
                 if (resultado.Succeeded)
                 {
                     //return RedirectToAction("Index", "Home");
                     return LocalRedirect(returnUrl);
+                }
+                else if (resultado.IsLockedOut)
+                {
+                    //return RedirectToAction("Index", "Home");
+                    return View("Bloqueado");
                 }
                 else
                 {
