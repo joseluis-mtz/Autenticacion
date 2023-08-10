@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Drawing;
 
 namespace LoginsAU.Controllers
 {
@@ -53,6 +54,11 @@ namespace LoginsAU.Controllers
                 var resultado = await _userManager.CreateAsync(Usuario, Registro.Password);
                 if (resultado.Succeeded)
                 {
+                    // Confirmacion de MAIL
+                    var codigo = await _userManager.GenerateEmailConfirmationTokenAsync(Usuario);
+                    var urlRetorno = Url.Action("ConfirmarEmail", "Cuentas", new { userId = Usuario.Id, code = codigo }, protocol: HttpContext.Request.Scheme);
+                    await _emailSender.SendEmailAsync(Registro.Email, "Confirmar cuenta - LoginsAU", "Confirme su cuenta dando click aqui: <a href = \"" + urlRetorno + ">Recuperar mi contraseña</a>");
+
                     await _signInManager.SignInAsync(Usuario, isPersistent: false);
                     //return RedirectToAction("Index", "Home");
                     return LocalRedirect(returnUrl);
@@ -161,6 +167,7 @@ namespace LoginsAU.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult CambiarPass(string code = null)
         {
             return code == null ? View("Error") : View();
@@ -199,9 +206,40 @@ namespace LoginsAU.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult ConfirmaRecuperacionPassword()
         {
             return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ConfirmarEmail(string userId, string codigo)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(codigo))
+            {
+                return View("Error");
+            }
+            else
+            {
+                var usuario = await _userManager.FindByIdAsync(userId);
+                if (usuario == null)
+                {
+                    return View("Error");
+                }
+                else
+                {
+                    var resultado = await _userManager.ConfirmEmailAsync(usuario, codigo);
+                    if (resultado.Succeeded)
+                    {
+                        return View("ConfirmarEmail");
+                    }
+                    else
+                    {
+                        return View("Error");
+                    }
+                }
+            }
+
         }
     }
 
