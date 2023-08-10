@@ -1,5 +1,7 @@
 using LoginsAU.Datos;
+using LoginsAU.ServiciosExternos;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,7 +13,8 @@ builder.Services.AddDbContext<AplicacionDbConext>(opciones =>
 
 // Agregar servicio Identity
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-                .AddEntityFrameworkStores<AplicacionDbConext>();
+                .AddEntityFrameworkStores<AplicacionDbConext>()
+                .AddDefaultTokenProviders();
 
 // URL de retorno para paginas no autorizadas
 builder.Services.ConfigureApplicationCookie(options => 
@@ -29,6 +32,9 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1);
     options.Lockout.MaxFailedAccessAttempts = 3;
 });
+
+// IEmailSender inyeccion
+builder.Services.AddTransient<IEmailSender, EnviadorMailJet>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

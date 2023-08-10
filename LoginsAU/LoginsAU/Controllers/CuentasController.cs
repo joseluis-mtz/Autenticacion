@@ -1,5 +1,7 @@
 ﻿using LoginsAU.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LoginsAU.Controllers
@@ -8,10 +10,12 @@ namespace LoginsAU.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
-        public CuentasController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+        private readonly IEmailSender _emailSender;
+        public CuentasController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IEmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailSender = emailSender;
         }
         public IActionResult Index()
         {
@@ -122,6 +126,44 @@ namespace LoginsAU.Controllers
         public IActionResult ResetPass() 
         {
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPass(ResetPassViewModel opViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var usuario = await _userManager.FindByEmailAsync(opViewModel.Email);
+                if (usuario == null)
+                {
+                    return RedirectToAction("ConfirmarPassword");
+                }
+                else
+                {
+                    var codigo = await _userManager.GeneratePasswordResetTokenAsync(usuario);
+                    var urlRetorno = Url.Action("CambiarPass", "Cuentas", new { userId = usuario.Id, code = codigo }, protocol: HttpContext.Request.Scheme);
+                    await _emailSender.SendEmailAsync(opViewModel.Email, "Recuperar contraseña - LoginsAU", "Recupere su contraseña dando click aqui: <a href = \"" + urlRetorno + ">Recuperar mi contraseña</a>");
+                    return RedirectToAction("ConfirmarPassword");
+                }
+            }
+            else
+            {
+                return View(opViewModel);
+            }
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ConfirmarPassword()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult CambiarPass(string code = null)
+        {
+            return code == null ? View("Error") : View();
         }
     }
 
