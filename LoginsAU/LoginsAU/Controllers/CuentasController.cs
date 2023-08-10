@@ -241,6 +241,16 @@ namespace LoginsAU.Controllers
             }
 
         }
+
+        [HttpGet]
+        public async Task<IActionResult> ActivarAutenticador()
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+            await _userManager.ResetAuthenticatorKeyAsync(usuario);
+            var token = await _userManager.GetAuthenticatorKeyAsync(usuario);
+            var authDosFactores = new DosFactoresViewModel() { Token = token };
+            return View(authDosFactores);
+        }
     }
 
 }

@@ -1,0 +1,29 @@
+﻿@model LoginsAU.Models.DosFactoresViewModel
+
+@{
+    ViewData["Title"] = "ActivarAutenticador";
+}
+
+<h1>Autenticador</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="ActivarAutenticador">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type ="hidden" asp-for="Token"/>
+            <div class="form-group">
+                <label asp-for="Code" class="control-label"></label>
+                <input asp-for="Code" class="form-control" />
+                <span asp-validation-for="Code" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Validar Código" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
