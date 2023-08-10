@@ -165,6 +165,44 @@ namespace LoginsAU.Controllers
         {
             return code == null ? View("Error") : View();
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CambiarPass(RecuperaPassViewModel rpViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var usuario = await _userManager.FindByEmailAsync(rpViewModel.Email);
+                if (usuario == null)
+                {
+                    return RedirectToAction("ConfirmaRecuperacionPassword");
+                }
+                else
+                {
+                    var resultado = await _userManager.ResetPasswordAsync(usuario, rpViewModel.Code, rpViewModel.Password);
+                    if (resultado.Succeeded)
+                    {
+                        return RedirectToAction("ConfirmaRecuperacionPassword");
+                    }
+                    else
+                    {
+                        ValidarErrores(resultado);
+                        return View();
+                    }
+                    
+                }
+            }
+            else
+            {
+                return View(rpViewModel);
+            }
+        }
+
+        [HttpGet]
+        public IActionResult ConfirmaRecuperacionPassword()
+        {
+            return View();
+        }
     }
 
 }

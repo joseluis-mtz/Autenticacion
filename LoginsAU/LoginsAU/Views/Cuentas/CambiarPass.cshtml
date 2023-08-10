@@ -9,8 +9,9 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="ResetPass" asp-controller="Cuentas" method="post">
+        <form asp-action="CambiarPass" asp-controller="Cuentas" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Code" />
             <div class="form-group">
                 <label asp-for="Email" class="control-label"></label>
                 <input asp-for="Email" class="form-control" />
@@ -25,11 +26,6 @@
                 <label asp-for="ConfirmPassword" class="control-label"></label>
                 <input asp-for="ConfirmPassword" class="form-control" />
                 <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Code" class="control-label"></label>
-                <input asp-for="Code" class="form-control" />
-                <span asp-validation-for="Code" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Cambiar contraseña" class="btn btn-primary" />
