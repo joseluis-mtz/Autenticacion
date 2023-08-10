@@ -109,6 +109,10 @@ namespace LoginsAU.Controllers
                     //return RedirectToAction("Index", "Home");
                     return View("Bloqueado");
                 }
+                else if (resultado.RequiresTwoFactor) 
+                {
+                    return RedirectToAction("VerificarCodAuth", new { returnUrl, Acceso.RememberMe });
+                }
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Acceso no válido");
@@ -250,6 +254,75 @@ namespace LoginsAU.Controllers
             var token = await _userManager.GetAuthenticatorKeyAsync(usuario);
             var authDosFactores = new DosFactoresViewModel() { Token = token };
             return View(authDosFactores);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ActivarAutenticador(DosFactoresViewModel dosFactoresVM)
+        {
+            if (ModelState.IsValid)
+            {
+                var usuario = await _userManager.GetUserAsync(User);
+                var exito = await _userManager.VerifyTwoFactorTokenAsync(usuario, _userManager.Options.Tokens.AuthenticatorTokenProvider, dosFactoresVM.Code);
+                if (exito)
+                {
+                    await _userManager.SetTwoFactorEnabledAsync(usuario, true);
+                }
+                else
+                {
+                    ModelState.AddModelError("Verificar", "Autenticación de dos factores no validada");
+                }
+            }
+            return RedirectToAction(nameof(ConfirmacionAuth));
+        }
+
+        [HttpGet]
+        public IActionResult ConfirmacionAuth()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> VerificarCodAuth(bool recordarDatos, string returnUrl = null)
+        {
+            var usuario = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+            if (usuario == null)
+            {
+                return View("Error");
+            }
+            else
+            {
+                ViewData["returnUrl"] = returnUrl;
+                return View(new VerificarAuthViewModel { ReturnURL = returnUrl, RecordarDatos = recordarDatos});
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AllowAnonymous]
+        public async Task<IActionResult> VerificarCodAuth(VerificarAuthViewModel veauVM)
+        {
+            veauVM.ReturnURL = veauVM.ReturnURL ?? Url.Content("~/");
+            if (!ModelState.IsValid)
+            {
+                return View(veauVM);
+            }
+            else
+            {
+                var resultado = await _signInManager.TwoFactorAuthenticatorSignInAsync(veauVM.Code, veauVM.RecordarDatos, rememberClient: true);
+                if (resultado.Succeeded)
+                {
+                    return LocalRedirect(veauVM.ReturnURL);
+                }
+                else if (resultado.IsLockedOut)
+                {
+                    return View("Bloqueado");
+                }
+                else 
+                {
+                    ModelState.AddModelError(string.Empty, "Código inválido");
+                    return View();
+                }
+            }
         }
     }
 
