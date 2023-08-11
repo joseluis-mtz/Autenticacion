@@ -7,7 +7,16 @@
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
     @if (User.Identity.IsAuthenticated)
     {
-        <a asp-action="ActivarAutenticador" asp-controller="Cuentas" class="btn btn-primary">Configurar auth dos factores</a>
-        <br />
+        var authDosFacAct = ViewData["Auth2FacAct"];
+        if (authDosFacAct != null && authDosFacAct.ToString().ToLower() == "true")
+        {
+            <a asp-action="DesactivarAutenticador" asp-controller="Cuentas" class="btn btn-primary">Desactivar auth dos factores</a>
+            <br />
+        }
+        else
+        {
+            <a asp-action="ActivarAutenticador" asp-controller="Cuentas" class="btn btn-primary">Activar auth dos factores</a>
+            <br />
+        }
     }
 </div>

@@ -269,10 +269,19 @@ namespace LoginsAU.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("Verificar", "Autenticación de dos factores no validada");
+                    ModelState.AddModelError("Error", "Autenticación de dos factores no validada");
+                    return View(dosFactoresVM);
                 }
             }
             return RedirectToAction(nameof(ConfirmacionAuth));
+        }
+        [HttpGet]
+        public async Task<IActionResult> DesactivarAutenticador()
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+            await _userManager.ResetAuthenticatorKeyAsync(usuario);
+            await _userManager.SetTwoFactorEnabledAsync(usuario, false);
+            return RedirectToAction(nameof(Index), "Home");
         }
 
         [HttpGet]
