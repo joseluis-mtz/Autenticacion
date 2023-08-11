@@ -3,35 +3,54 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using System.Drawing;
 
 namespace LoginsAU.Controllers
 {
+    [Authorize]
     public class CuentasController : Controller
     {
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IEmailSender _emailSender;
-        public CuentasController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IEmailSender emailSender)
+        public CuentasController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IEmailSender emailSender, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
+            _roleManager = roleManager;
         }
+
+        [HttpGet]
+        [AllowAnonymous]
         public IActionResult Index()
         {
             return View();
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Registro(string returnUrl = null)
         {
+            if (!await _roleManager.RoleExistsAsync("Administrador"))
+            {
+                await _roleManager.CreateAsync(new IdentityRole("Administrador"));
+            }
+
+            if (!await _roleManager.RoleExistsAsync("Registrado"))
+            {
+                await _roleManager.CreateAsync(new IdentityRole("Registrado"));
+            }
+
             ViewData["returnUrl"] = returnUrl;
             RegistroViewModel regVM = new RegistroViewModel();
             return View(regVM);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> Registro(RegistroViewModel Registro, string returnUrl = null)
         {
             ViewData["returnUrl"] = returnUrl;
@@ -54,6 +73,8 @@ namespace LoginsAU.Controllers
                 var resultado = await _userManager.CreateAsync(Usuario, Registro.Password);
                 if (resultado.Succeeded)
                 {
+                    //
+                    await _userManager.AddToRoleAsync(Usuario, "Administrador");
                     // Confirmacion de MAIL
                     var codigo = await _userManager.GenerateEmailConfirmationTokenAsync(Usuario);
                     var urlRetorno = Url.Action("ConfirmarEmail", "Cuentas", new { userId = Usuario.Id, code = codigo }, protocol: HttpContext.Request.Scheme);
@@ -75,6 +96,7 @@ namespace LoginsAU.Controllers
             }
         }
 
+        [AllowAnonymous]
         private void ValidarErrores(IdentityResult Resultado)
         {
             foreach (var item in Resultado.Errors) 
@@ -84,6 +106,7 @@ namespace LoginsAU.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Acceso(string returnUrl = null)
         {
             ViewData["returnUrl"] = returnUrl;
@@ -92,6 +115,7 @@ namespace LoginsAU.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> Acceso(AccesoViewModel Acceso, string returnUrl = null)
         {
             ViewData["returnUrl"] = returnUrl;
@@ -133,6 +157,7 @@ namespace LoginsAU.Controllers
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult ResetPass() 
         {
             return View();
@@ -140,6 +165,7 @@ namespace LoginsAU.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> ResetPass(ResetPassViewModel opViewModel)
         {
             if (ModelState.IsValid)
@@ -179,6 +205,7 @@ namespace LoginsAU.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> CambiarPass(RecuperaPassViewModel rpViewModel)
         {
             if (ModelState.IsValid)
@@ -291,6 +318,7 @@ namespace LoginsAU.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> VerificarCodAuth(bool recordarDatos, string returnUrl = null)
         {
             var usuario = await _signInManager.GetTwoFactorAuthenticationUserAsync();
